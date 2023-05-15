@@ -570,35 +570,44 @@ class VectorQuantizer(nn.Module):
         #将 z_q 从形状 (batch_size * height * width, D) 的张量转换为 (batch_size, height, width, D) 的张量
         z_q = z_q.view(batch_size, height, width, -1)  # .permute(0, 2, 3, 1).contiguous()
 
-        if self.training and self.embed_ema:
+        if self.training and self.embed_ema:# 判断是否为训练模式和是否使用指数滑动平均
             # import pdb; pdb.set_trace()
             assert self.distance_type in ['euclidean', 'cosine']
+             # 将最小编码索引转换成 one-hot 向量
             indices_onehot = F.one_hot(min_encoding_indices, self.n_e).to(z_flattened.dtype)  # L x n_e
+             # 计算每个聚类中包含的样本数量总和和样本嵌入向量的总和
             indices_onehot_sum = indices_onehot.sum(0)  # n_e
             z_sum = (z_flattened.transpose(0, 1) @ indices_onehot).transpose(0, 1)  # n_e x D
-
+            
+            # 执行全局归约操作，计算所有进程的 indices_onehot_sum 和 z_sum 的和
             all_reduce(indices_onehot_sum)
             all_reduce(z_sum)
-
+            
+            # 更新聚类中包含的样本数量总和和样本嵌入向量的总和的指数滑动平均值
             self.cluster_size.data.mul_(self.decay).add_(indices_onehot_sum, alpha=1 - self.decay)
             self.embedding_avg.data.mul_(self.decay).add_(z_sum, alpha=1 - self.decay)
+             # 计算嵌入向量的新的均值，并将其赋值为 self.embedding
             n = self.cluster_size.sum()
             cluster_size = (self.cluster_size + self.eps) / (n + self.n_e * self.eps) * n
             embed_normalized = self.embedding_avg / cluster_size.unsqueeze(1)
             self.embedding.data.copy_(embed_normalized)
 
+        # 根据是否使用指数滑动平均计算损失
         if self.embed_ema:
             loss = (z_q.detach() - z).pow(2).mean()
         else:
             # compute loss for embedding
             loss = torch.mean((z_q.detach() - z).pow(2)) + self.beta * torch.mean((z_q - z.detach()).pow(2))
 
-        # preserve gradients
+        # preserve gradients # 计算量化后的 z_q，并将其与原始向量 z 做差，再加上 z，得到最终的 z_q
         z_q = z + (z_q - z).detach()
 
-        # reshape back to match original input shape
+        # reshape back to match original input shape # 将形状从 BxCxHxW 转换为 BxHxWxC
         z_q = z_q.permute(0, 3, 1, 2).contiguous()
+        # 获取最小编码索引的唯一值
         unique_idx = min_encoding_indices.unique()
+
+        # 返回结果字典
         output = {
             'quantize': z_q,
             'used_unmasked_quantize_embed': torch.zeros_like(loss) + (unique_idx < self.masked_embed_start).sum(),
@@ -606,12 +615,6 @@ class VectorQuantizer(nn.Module):
             'quantize_loss': loss,
             'index': min_encoding_indices.view(batch_size, height, width)
         }
-        if token_type_flattened is not None:
-            unmasked_num_token = all_reduce((token_type_flattened == 1).sum())
-            masked_num_token = all_reduce((token_type_flattened != 1).sum())
-            output['unmasked_num_token'] = unmasked_num_token
-            output['masked_num_token'] = masked_num_token
-
         return output
 
     def get_codebook_entry(self, indices, shape):
