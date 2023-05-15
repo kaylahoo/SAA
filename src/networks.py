@@ -159,7 +159,7 @@ class EdgeGenerator(BaseNetwork):
         return x, emb_loss
 
 
- def value_scheduler(init_value, dest_value, step, step_range, total_steps, scheduler_type='cosine'):
+def value_scheduler(init_value, dest_value, step, step_range, total_steps, scheduler_type='cosine'):
      assert scheduler_type in ['cosine', 'step'], 'scheduler {} not implemented!'.format(scheduler_type)
 
      step_start, step_end = tuple(step_range)
