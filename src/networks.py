@@ -129,7 +129,7 @@ class EdgeGenerator(BaseNetwork):
             blocks2.append(block)
 
         self.middle2 = nn.Sequential(*blocks2)
-        self.quantize = VectorQuantizer()
+        self.quantize = VectorQuantizer(n_e=1024,e_dim=512)
         self.decoder = nn.Sequential(
             spectral_norm(nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(128, track_running_stats=False),
