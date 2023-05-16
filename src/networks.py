@@ -255,6 +255,7 @@ class VectorQuantizer(nn.Module):
         self.e_dim = e_dim
         self.beta = beta
         self.n_cluster = n_cluster
+        self.semantic_label = None
         self.embed_ema = embed_ema
         self.gumbel_sample = gumbel_sample
         self.adjust_logits_for_gumbel = adjust_logits_for_gumbel
