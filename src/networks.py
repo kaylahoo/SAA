@@ -231,7 +231,7 @@ class VectorQuantizer(nn.Module):
                  n_e,#嵌入向量的数量
                  e_dim,#嵌入向量的维度
                  beta=0.25,#损失项中使用的代价因子
-                 n_cluster=8,
+                 n_cluster=0,
                  masked_embed_start=None,
                  embed_init_scale=1.0,#嵌入向量的初试大小
                  embed_ema=False,#是否使用指数加权平均EMA嵌入向量？
