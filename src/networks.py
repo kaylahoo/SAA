@@ -139,7 +139,7 @@ class EdgeGenerator(BaseNetwork):
         self.decoder = nn.Sequential(
 
             spectral_norm(nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=3, stride=2, padding=1), use_spectral_norm),
-            nn.InstanceNorm2d(128, track_running_stats=False),
+            nn.InstanceNorm2d(256, track_running_stats=False),
             nn.ReLU(True),
 
             spectral_norm(nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=3, stride=2, padding=1), use_spectral_norm),
