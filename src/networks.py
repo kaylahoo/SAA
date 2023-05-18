@@ -505,15 +505,12 @@ class VectorQuantizer(nn.Module):
                 - used_cluster: 被使用到的码本簇的集合
         """
         d = self.get_distance(z)  # 获取特征向量 z 与码本向量之间的距离
-        print(z.shape,'000000000000')
 
         # find closest encodings
         # import pdb; pdb.set_trace()
         if self.n_cluster == 0:  # 如果码本聚类数量为 0
             # min_encoding_indices = torch.argmin(d, dim=1) # L
-            print(d.shape,'11111111111')
             min_encoding_indices = self.get_index(d, topk=topk, step=step, total_steps=total_steps)  # 直接返回最相似的码本向量
-            print(min_encoding_indices.shape,'222222222')
         else:  # 如果码本聚类数量不为 0
         #？ min_encoding_indices = torch.zeros(z.shape[0]).long().to(z.device)   # 创建一个全部元素为 0 的一维张量
             self.update_semantic_label() # 更新语义标签
@@ -577,7 +574,8 @@ class VectorQuantizer(nn.Module):
         # import pdb; pdb.set_trace()
         z = z.permute(0, 2, 3, 1).contiguous()  # B x H x W x C
         z_flattened = z.view(-1, self.e_dim)  # BHW x C
-
+        print(z.shape, '1111111')
+        print(z_flattened.shape, '22222222')
 
 
         token_type_flattened = None
