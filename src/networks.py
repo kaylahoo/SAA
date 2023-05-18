@@ -658,7 +658,7 @@ class Discriminator(BaseNetwork):
         self.use_sigmoid = use_sigmoid
         inplace = True
         self.conv1 = self.features = nn.Sequential(
-            spectral_norm(nn.Conv2d(in_channels=in_channels, out_channels=64, kernel_size=4, stride=2, padding=1, bias=not use_spectral_norm), use_spectral_norm),
+            spectral_norm(nn.Conv2d(in_channels=3, out_channels=64, kernel_size=4, stride=2, padding=1, bias=not use_spectral_norm), use_spectral_norm),
             nn.LeakyReLU(0.2, inplace=inplace),
         )
 
