@@ -101,8 +101,6 @@ class EdgeModel(BaseModel):
 
         # discriminator loss
         dis_input_real = torch.cat((images, edges), dim=1)
-        print(images.shape,'1111100')
-        print(outputs.shape,'222222')
         dis_input_fake = torch.cat((images, outputs.detach()), dim=1)
         dis_real, dis_real_feat = self.discriminator(dis_input_real)        # in: (grayscale(1) + edge(1))
         dis_fake, dis_fake_feat = self.discriminator(dis_input_fake)        # in: (grayscale(1) + edge(1))
