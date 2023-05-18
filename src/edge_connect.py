@@ -110,8 +110,8 @@ class EdgeConnect():
                     precision, recall = self.edgeacc(edges * masks, outputs * masks)
                     logs.append(('precision', precision.item()))
                     logs.append(('recall', recall.item()))
-                    logs.append(('gen_loss', gen_loss))
-                    logs.append(('dis_loss', dis_loss))
+                    logs.append(('gen_loss', gen_loss.item()))
+                    logs.append(('dis_loss', dis_loss.item()))
 
                     # backward
                     self.edge_model.backward(gen_loss, dis_loss)
