@@ -104,7 +104,7 @@ class EdgeConnect():
                 # edge model
                 if model == 1:
                     # train
-                    outputs, gen_loss, dis_loss, logs = self.edge_model.process(images_gray, edges, masks)
+                    outputs, gen_loss, dis_loss, logs = self.edge_model.process(images, edges, masks)
 
                     # metrics
                     precision, recall = self.edgeacc(edges * masks, outputs * masks)
