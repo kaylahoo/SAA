@@ -116,8 +116,8 @@ class EdgeGenerator(BaseNetwork):
             nn.InstanceNorm2d(256, track_running_stats=False),
             nn.ReLU(True),
 
-            spectral_norm(nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, stride=2, padding=1), use_spectral_norm),
-            nn.InstanceNorm2d(256, track_running_stats=False),
+            spectral_norm(nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            nn.InstanceNorm2d(512, track_running_stats=False),
             nn.ReLU(True)
 
 
@@ -125,20 +125,20 @@ class EdgeGenerator(BaseNetwork):
 
         blocks1 = []
         for _ in range(4):
-            block = ResnetBlock(256, 2, use_spectral_norm=use_spectral_norm)
+            block = ResnetBlock(512, 2, use_spectral_norm=use_spectral_norm)
             blocks1.append(block)
 
         self.middle1 = nn.Sequential(*blocks1)
         blocks2 = []
         for _ in range(4):
-            block = ResnetBlock(256, 2, use_spectral_norm=use_spectral_norm)
+            block = ResnetBlock(512, 2, use_spectral_norm=use_spectral_norm)
             blocks2.append(block)
 
         self.middle2 = nn.Sequential(*blocks2)
         self.quantize = VectorQuantizer(n_e=1024,e_dim=512)
         self.decoder = nn.Sequential(
 
-            spectral_norm(nn.ConvTranspose2d(in_channels=256, out_channels=256, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            spectral_norm(nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=3, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(128, track_running_stats=False),
             nn.ReLU(True),
 
@@ -574,8 +574,6 @@ class VectorQuantizer(nn.Module):
         # import pdb; pdb.set_trace()
         z = z.permute(0, 2, 3, 1).contiguous()  # B x H x W x C
         z_flattened = z.view(-1, self.e_dim)  # BHW x C
-        print(z.shape, '1111111')
-        print(z_flattened.shape, '22222222')
 
 
         token_type_flattened = None
