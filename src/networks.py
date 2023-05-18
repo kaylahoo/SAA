@@ -620,7 +620,7 @@ class VectorQuantizer(nn.Module):
         z_q = z_q.permute(0, 3, 1, 2).contiguous()
         # 获取最小编码索引的唯一值
         unique_idx = min_encoding_indices.unique()
-
+        print(min_encoding_indices.shape,'111111111')
         # 返回结果字典
         output = {
             'quantize': z_q,
