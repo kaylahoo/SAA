@@ -313,7 +313,7 @@ class EdgeConnect():
 
             # edge model
             if model == 1:
-                outputs = self.edge_model(images, edges, masks)
+                outputs = self.edge_model(images, edges, masks)[0]
                 outputs_merged = (outputs * masks) + (edges * (1 - masks))
 
             # inpaint model
@@ -359,7 +359,7 @@ class EdgeConnect():
         if model == 1:
             iteration = self.edge_model.iteration
             inputs = (images_gray * (1 - masks)) + masks
-            outputs = self.edge_model(images, edges, masks)
+            outputs = self.edge_model(images, edges, masks)[0]
             outputs_merged = outputs
 
         # inpaint model
