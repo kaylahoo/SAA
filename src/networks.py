@@ -108,15 +108,15 @@ class EdgeGenerator(BaseNetwork):
             nn.InstanceNorm2d(64, track_running_stats=False),
             nn.ReLU(True),
 
-            spectral_norm(nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            spectral_norm(nn.Conv2d(in_channels=64, out_channels=128,  kernel_size=4, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(128, track_running_stats=False),
             nn.ReLU(True),
 
-            spectral_norm(nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            spectral_norm(nn.Conv2d(in_channels=128, out_channels=256, kernel_size=4, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(256, track_running_stats=False),
             nn.ReLU(True),
 
-            spectral_norm(nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            spectral_norm(nn.Conv2d(in_channels=256, out_channels=512, kernel_size=4, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(512, track_running_stats=False),
             nn.ReLU(True)
 
@@ -138,15 +138,15 @@ class EdgeGenerator(BaseNetwork):
         self.quantize = VectorQuantizer(n_e=1024,e_dim=512)
         self.decoder = nn.Sequential(
 
-            spectral_norm(nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            spectral_norm(nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=4, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(256, track_running_stats=False),
             nn.ReLU(True),
 
-            spectral_norm(nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            spectral_norm(nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(128, track_running_stats=False),
             nn.ReLU(True),
 
-            spectral_norm(nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=3, stride=2, padding=1), use_spectral_norm),
+            spectral_norm(nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1), use_spectral_norm),
             nn.InstanceNorm2d(64, track_running_stats=False),
             nn.ReLU(True),
 
