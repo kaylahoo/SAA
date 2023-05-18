@@ -505,6 +505,7 @@ class VectorQuantizer(nn.Module):
                 - used_cluster: 被使用到的码本簇的集合
         """
         d = self.get_distance(z)  # 获取特征向量 z 与码本向量之间的距离
+        print(z.shape,'000000000000')
 
         # find closest encodings
         # import pdb; pdb.set_trace()
