@@ -510,7 +510,9 @@ class VectorQuantizer(nn.Module):
         # import pdb; pdb.set_trace()
         if self.n_cluster == 0:  # 如果码本聚类数量为 0
             # min_encoding_indices = torch.argmin(d, dim=1) # L
+            print(d.shape,'11111111111')
             min_encoding_indices = self.get_index(d, topk=topk, step=step, total_steps=total_steps)  # 直接返回最相似的码本向量
+            print(min_encoding_indices.shape,'222222222')
         else:  # 如果码本聚类数量不为 0
         #？ min_encoding_indices = torch.zeros(z.shape[0]).long().to(z.device)   # 创建一个全部元素为 0 的一维张量
             self.update_semantic_label() # 更新语义标签
@@ -620,7 +622,6 @@ class VectorQuantizer(nn.Module):
         z_q = z_q.permute(0, 3, 1, 2).contiguous()
         # 获取最小编码索引的唯一值
         unique_idx = min_encoding_indices.unique()
-        print(min_encoding_indices.shape,'111111111')
         # 返回结果字典
         output = {
             'quantize': z_q,
