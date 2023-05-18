@@ -234,7 +234,7 @@ class EdgeConnect():
             # edge model
             if model == 1:
                 # eval
-                outputs, gen_loss, dis_loss, logs = self.edge_model.process(images_gray, edges, masks)
+                outputs, gen_loss, dis_loss, logs = self.edge_model.process(images, edges, masks)
 
                 # metrics
                 precision, recall = self.edgeacc(edges * masks, outputs * masks)
@@ -313,7 +313,7 @@ class EdgeConnect():
 
             # edge model
             if model == 1:
-                outputs = self.edge_model(images_gray, edges, masks)
+                outputs = self.edge_model(images, edges, masks)
                 outputs_merged = (outputs * masks) + (edges * (1 - masks))
 
             # inpaint model
@@ -359,7 +359,7 @@ class EdgeConnect():
         if model == 1:
             iteration = self.edge_model.iteration
             inputs = (images_gray * (1 - masks)) + masks
-            outputs = self.edge_model(images_gray, edges, masks)
+            outputs = self.edge_model(images, edges, masks)
             outputs_merged = (outputs * masks) + (edges * (1 - masks))
 
         # inpaint model
