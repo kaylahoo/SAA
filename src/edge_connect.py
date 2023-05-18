@@ -360,7 +360,7 @@ class EdgeConnect():
             iteration = self.edge_model.iteration
             inputs = (images_gray * (1 - masks)) + masks
             outputs = self.edge_model(images, edges, masks)
-            outputs_merged = (outputs * masks) + (edges * (1 - masks))
+            outputs_merged = outputs
 
         # inpaint model
         elif model == 2:
