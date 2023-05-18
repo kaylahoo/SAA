@@ -100,8 +100,10 @@ class EdgeModel(BaseModel):
 
 
         # discriminator loss
-        dis_input_real = torch.cat((images, edges), dim=1)
-        dis_input_fake = torch.cat((images, outputs.detach()), dim=1)
+        # dis_input_real = torch.cat((images, edges), dim=1)
+        # dis_input_fake = torch.cat((images, outputs.detach()), dim=1)
+        dis_input_real = images
+        dis_input_fake = outputs.detach()
         dis_real, dis_real_feat = self.discriminator(dis_input_real)        # in: (grayscale(1) + edge(1))
         dis_fake, dis_fake_feat = self.discriminator(dis_input_fake)        # in: (grayscale(1) + edge(1))
         dis_real_loss = self.adversarial_loss(dis_real, True, True)
@@ -135,9 +137,10 @@ class EdgeModel(BaseModel):
         return outputs, gen_loss, dis_loss, logs
 
     def forward(self, images, edges, masks):
-        edges_masked = (edges * (1 - masks))
-        images_masked = (images * (1 - masks)) + masks
-        inputs = torch.cat((images_masked, edges_masked, masks), dim=1)
+        # edges_masked = (edges * (1 - masks))
+        # images_masked = (images * (1 - masks)) + masks
+        # inputs = torch.cat((images_masked, edges_masked, masks), dim=1)
+        inputs = images
         outputs, ema_loss = self.generator(inputs)                                    # in: [grayscale(1) + edge(1) + mask(1)]
         return outputs, ema_loss
 
