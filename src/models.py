@@ -112,8 +112,8 @@ class EdgeModel(BaseModel):
 
 
         # generator adversarial loss
-        gen_input_fake = torch.cat((images, outputs), dim=1)
-        gen_fake, gen_fake_feat = self.discriminator(gen_input_fake)        # in: (grayscale(1) + edge(1))
+        # gen_input_fake = torch.cat((images, outputs), dim=1)
+        gen_fake, gen_fake_feat = self.discriminator(outputs)        # in: (grayscale(1) + edge(1))
         gen_gan_loss = self.adversarial_loss(gen_fake, True, False)
         gen_loss += gen_gan_loss
 
