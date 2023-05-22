@@ -223,7 +223,7 @@ class EdgeConnect():
         model = self.config.MODEL
         total = len(self.val_dataset)
 
-        self.edge_model.eval()
+        #self.edge_model.eval()
         self.inpaint_model.eval()
 
         progbar = Progbar(total, width=20, stateful_metrics=['it'])
@@ -248,7 +248,8 @@ class EdgeConnect():
             elif model == 2:
                 # eval
                 outputs, gen_loss, dis_loss, logs = self.inpaint_model.process(images, edges, masks)
-                outputs_merged = (outputs * masks) + (images * (1 - masks))
+                #outputs_merged = (outputs * masks) + (images * (1 - masks))
+                outputs_merged = outputs
 
                 # metrics
                 psnr = self.psnr(self.postprocess(images), self.postprocess(outputs_merged))
@@ -296,7 +297,7 @@ class EdgeConnect():
             progbar.add(len(images), values=logs)
 
     def test(self):
-        self.edge_model.eval()
+        #self.edge_model.eval()
         self.inpaint_model.eval()
 
         model = self.config.MODEL
@@ -321,7 +322,8 @@ class EdgeConnect():
             # inpaint model
             elif model == 2:
                 outputs = self.inpaint_model(images, edges, masks)
-                outputs_merged = (outputs * masks) + (images * (1 - masks))
+                #outputs_merged = (outputs * masks) + (images * (1 - masks))
+                outputs_merged = outputs
 
             # inpaint with edge model / joint model
             else:
@@ -350,7 +352,7 @@ class EdgeConnect():
         if len(self.val_dataset) == 0:
             return
 
-        self.edge_model.eval()
+        #self.edge_model.eval()
         self.inpaint_model.eval()
 
         model = self.config.MODEL
@@ -367,9 +369,11 @@ class EdgeConnect():
         # inpaint model
         elif model == 2:
             iteration = self.inpaint_model.iteration
-            inputs = (images * (1 - masks)) + masks
-            outputs = self.inpaint_model(images, edges, masks)
-            outputs_merged = (outputs * masks) + (images * (1 - masks))
+            #inputs = (images * (1 - masks)) + masks
+            inputs = images
+            outputs = self.inpaint_model(images, edges, masks)[0]
+            #outputs_merged = (outputs * masks) + (images * (1 - masks))
+            outputs_merged = outputs
 
         # inpaint with edge model / joint model
         else:
