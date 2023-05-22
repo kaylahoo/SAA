@@ -308,6 +308,28 @@ class VectorQuantizer(nn.Module):
             # 如果使用的是学习得到的距离权重，那么定义一个nn.Linear层
             self.distance_fc = nn.Linear(self.e_dim, self.n_e)
 
+        self.pos_enc = build_position_encoding(hidden_dim=self.e_dim)
+        self.semantic_pos = nn.Sequential(*[
+             nn.Linear(self.n_cluster, 64),
+             nn.ReLU(inplace=True),
+             nn.Linear(64, self.n_cluster),
+        ])
+        # self.semantic_classifier = nn.Sequential(*[
+        #     nn.Linear(self.e_dim, self.e_dim * 2),
+        #     nn.ReLU(inplace=True),
+        #     nn.Linear(self.e_dim * 2, 1024),
+        #     # nn.Softmax(dim=1)
+        # ])
+        # self.alpha = nn.Parameter(torch.ones(size=(1, self.n_cluster)) * 0.1, requires_grad=True)
+
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+               nn.init.kaiming_uniform_(m.weight, mode='fan_out')
+
+
+
+
+
     @property
     def device(self):
         # 返回嵌入向量保存的设备类型
