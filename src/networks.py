@@ -586,7 +586,7 @@ class VectorQuantizer(nn.Module):
         else:
             raise NotImplementedError
 
-        return z_q, min_encoding_indices#, cls_loss, orth_loss, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
+        return z_q, min_encoding_indices, cls_loss, orth_loss, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
 
     def forward(self, z, token_type=None, topk=1, step=None, total_steps=None):
         """
@@ -609,7 +609,7 @@ class VectorQuantizer(nn.Module):
 
         token_type_flattened = None
         # 获取量化结果和最小编码索引
-        z_q, min_encoding_indices = self._quantize(z_flattened, topk=1, step=None,
+        z_q, min_encoding_indices,cls_loss, orth_loss, used_cluster = self._quantize(z_flattened, topk=1, step=None,
                                                    total_steps=None)
         #将 z_q 从形状 (batch_size * height * width, D) 的张量转换为 (batch_size, height, width, D) 的张量
         z_q = z_q.view(batch_size, height, width, -1)  # .permute(0, 2, 3, 1).contiguous()
