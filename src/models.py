@@ -63,13 +63,18 @@ class EdgeModel(BaseModel):
         if len(config.GPU) > 1:
             generator = nn.DataParallel(generator, config.GPU)
             discriminator = nn.DataParallel(discriminator, config.GPU)
+
         l1_loss = nn.L1Loss()
+        perceptual_loss = PerceptualLoss()
+        style_loss = StyleLoss()
         adversarial_loss = AdversarialLoss(type=config.GAN_LOSS)
 
         self.add_module('generator', generator)
         self.add_module('discriminator', discriminator)
 
         self.add_module('l1_loss', l1_loss)
+        self.add_module('perceptual_loss', perceptual_loss)
+        self.add_module('style_loss', style_loss)
         self.add_module('adversarial_loss', adversarial_loss)
 
         self.gen_optimizer = optim.Adam(
