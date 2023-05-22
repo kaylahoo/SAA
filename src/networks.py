@@ -242,7 +242,7 @@ class VectorQuantizer(nn.Module):
                  n_e,#嵌入向量的数量
                  e_dim,#嵌入向量的维度
                  beta=0.25,#损失项中使用的代价因子
-                 n_cluster=0,
+                 n_cluster=8,
                  masked_embed_start=None,
                  embed_init_scale=1.0,#嵌入向量的初试大小
                  embed_ema=False,#是否使用指数加权平均EMA嵌入向量？
@@ -515,7 +515,7 @@ class VectorQuantizer(nn.Module):
         #？ min_encoding_indices = torch.zeros(z.shape[0]).long().to(z.device)   # 创建一个全部元素为 0 的一维张量
             self.update_semantic_label() # 更新语义标签
 
-            embed_semantic_label = F.one_hot(self.semantic_label).to(torch.float32)   # 对语义标签进行独热编码
+            embed_semantic_label = F.one_hot(self.semantic_label).to(torch.float32)   # 对语义标签进行one_hot编码
             d_from_cluster = (d @ embed_semantic_label) / torch.sum(embed_semantic_label, dim=0)   # 计算距离码本簇平均值的距离
             likelihood_value = d_from_cluster     # 1024 x 16   # 计算概率值
 
@@ -555,7 +555,7 @@ class VectorQuantizer(nn.Module):
         else:
             raise NotImplementedError
 
-        return z_q, min_encoding_indices#, cls_loss, orth_loss, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
+        return z_q, min_encoding_indices, cls_loss, orth_loss, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
 
     def forward(self, z, token_type=None, topk=1, step=None, total_steps=None):
         """
