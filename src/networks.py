@@ -324,7 +324,7 @@ class VectorQuantizer(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Linear):
-               nn.init.kaiming_uniform_(m.weight, mode='fan_out')
+             nn.init.kaiming_uniform_(m.weight, mode='fan_out')
 
 
 
@@ -509,6 +509,15 @@ class VectorQuantizer(nn.Module):
             d = d[:, :self.masked_embed_start]
 
         return d  # 返回计算出的距离矩阵
+    
+
+    def orth_loss(self, lamb=1e-3):
+            w = self.embed_weight[:self.n_cluster]
+            loss = w @ w.t() * (torch.ones(self.n_cluster, self.n_cluster) - torch.eye(self.n_cluster)).to(w.device)
+            loss = torch.sum(loss ** 2)
+            return loss * lamb
+
+
 
     def _quantize(self, z, token_type=None, topk=1, step=None, total_steps=None):
         """
