@@ -96,7 +96,7 @@ class EdgeConnect():
             progbar = Progbar(total, width=20, stateful_metrics=['epoch', 'iter'])
 
             for items in train_loader:
-                self.edge_model.train()
+                #self.edge_model.train()
                 self.inpaint_model.train()
 
                 images, images_gray, edges, masks = self.cuda(*items)
