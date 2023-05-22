@@ -242,7 +242,7 @@ class VectorQuantizer(nn.Module):
                  n_e,#嵌入向量的数量
                  e_dim,#嵌入向量的维度
                  beta=0.25,#损失项中使用的代价因子
-                 n_cluster=8,
+                 n_cluster=0,
                  masked_embed_start=None,
                  embed_init_scale=1.0,#嵌入向量的初试大小
                  embed_ema=False,#是否使用指数加权平均EMA嵌入向量？
@@ -586,7 +586,7 @@ class VectorQuantizer(nn.Module):
         else:
             raise NotImplementedError
 
-        return z_q, min_encoding_indices, cls_loss, orth_loss, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
+        return z_q, min_encoding_indices#, cls_loss, orth_loss, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
 
     def forward(self, z, token_type=None, topk=1, step=None, total_steps=None):
         """
@@ -609,7 +609,7 @@ class VectorQuantizer(nn.Module):
 
         token_type_flattened = None
         # 获取量化结果和最小编码索引
-        z_q, min_encoding_indices,cls_loss, orth_loss, used_cluster = self._quantize(z_flattened, token_type=token_type_flattened, topk=1, step=None,
+        z_q, min_encoding_indices = self._quantize(z_flattened, token_type=token_type_flattened, topk=1, step=None,
                                                    total_steps=None)
         #将 z_q 从形状 (batch_size * height * width, D) 的张量转换为 (batch_size, height, width, D) 的张量
         z_q = z_q.view(batch_size, height, width, -1)  # .permute(0, 2, 3, 1).contiguous()
