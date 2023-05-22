@@ -586,7 +586,7 @@ class VectorQuantizer(nn.Module):
         else:
             raise NotImplementedError
 
-        return z_q, min_encoding_indices, cls_loss, orth_loss, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
+        return z_q, min_encoding_indices, cls_loss, orth_loss#, used_cluster  # 返回量化后的向量 z_q，最相似的码本向量索引，分类误差损失，正交约束损失以及使用到的码本簇
 
     def forward(self, z, token_type=None, topk=1, step=None, total_steps=None):
         """
