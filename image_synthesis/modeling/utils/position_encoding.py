@@ -23,7 +23,7 @@ class PositionEmbeddingSine(nn.Module):
             scale = 2 * math.pi
         self.scale = scale
 
-    def forward(self, tensor, mask=None, size=(16, 32, 32, 512)):
+    def forward(self, tensor, mask=None, size=(12, 32, 32, 512)):
         x = tensor.view(size)
         b, h, w, c = x.size()
 
