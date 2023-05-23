@@ -124,7 +124,7 @@ class InpaintGenerator(BaseNetwork):
         if 'model' in sd:
             sd = sd['model']
         else:
-            sd = sd["state_dict"]
+            sd = sd["generator"]
         keys = list(sd.keys())
         for k in keys:
             for ik in ignore_keys:
