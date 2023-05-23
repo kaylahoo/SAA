@@ -319,7 +319,8 @@ class InpaintingModel1(BaseModel):
         self.gen_optimizer.zero_grad()
         self.dis_optimizer.zero_grad()
 
-
+        print(images.shape)
+        print(masks.shape, '11111111')
         # process outputs
         outputs = self(images, masks)
         gen_loss = 0
