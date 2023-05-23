@@ -429,7 +429,7 @@ class EdgeConnect():
         elif model == 3:
             iteration = self.inpaint_model1.iteration
             #inputs = (images * (1 - masks)) + masks
-            inputs = images
+            inputs = (images * (1 - masks)) + masks
             outputs = self.inpaint_model1(images, masks)
             #outputs_merged = (outputs * masks) + (images * (1 - masks))
             outputs_merged = (outputs * (1 - masks)) + (images * masks)
