@@ -120,6 +120,7 @@ class InpaintGenerator(BaseNetwork):
 
     def init_from_ckpt(self, path, ignore_keys=list()):
         sd = torch.load(path, map_location="cpu")
+        print(sd.keys())
         if 'model' in sd:
             sd = sd['model']
         else:
