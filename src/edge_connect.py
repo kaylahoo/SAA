@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from .dataset import Dataset
-from .models import EdgeModel, InpaintingModel
+from .models import EdgeModel, InpaintingModel,InpaintingModel1
 from .utils import Progbar, create_dir, stitch_images, imsave
 from .metrics import PSNR, EdgeAccuracy
 
@@ -25,6 +25,7 @@ class EdgeConnect():
         self.model_name = model_name
         #self.edge_model = EdgeModel(config).to(config.DEVICE)
         self.inpaint_model = InpaintingModel(config).to(config.DEVICE)
+        self.inpaint_model1 = InpaintingModel1(config).to(config.DEVICE)
 
         self.psnr = PSNR(255.0).to(config.DEVICE)
         self.edgeacc = EdgeAccuracy(config.EDGE_THRESHOLD).to(config.DEVICE)
