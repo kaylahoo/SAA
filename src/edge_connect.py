@@ -24,7 +24,7 @@ class EdgeConnect():
         self.debug = False
         self.model_name = model_name
         #self.edge_model = EdgeModel(config).to(config.DEVICE)
-        self.inpaint_model = InpaintingModel(config).to(config.DEVICE)
+        #self.inpaint_model = InpaintingModel(config).to(config.DEVICE)
         self.inpaint_model1 = InpaintingModel1(config).to(config.DEVICE)
 
         self.psnr = PSNR(255.0).to(config.DEVICE)
@@ -56,6 +56,9 @@ class EdgeConnect():
         elif self.config.MODEL == 2:
             self.inpaint_model.load()
 
+        elif self.config.MODEL == 3:
+            self.inpaint_model1.load()
+
         else:
             self.edge_model.load()
             self.inpaint_model.load()
@@ -64,8 +67,11 @@ class EdgeConnect():
         if self.config.MODEL == 1:
             self.edge_model.save()
 
-        elif self.config.MODEL == 2 or self.config.MODEL == 3:
+        elif self.config.MODEL == 2: #or self.config.MODEL == 3:
             self.inpaint_model.save()
+
+        elif self.config.MODEL == 3: #or self.config.MODEL == 3:
+            self.inpaint_model1.save()
 
         else:
             self.edge_model.save()
@@ -137,26 +143,43 @@ class EdgeConnect():
 
 
                 # inpaint with edge model
+
                 elif model == 3:
-                    # train
-                    if True or np.random.binomial(1, 0.5) > 0:
-                        outputs = self.edge_model(images_gray, edges, masks)
-                        outputs = outputs * masks + edges * (1 - masks)
-                    else:
-                        outputs = edges
 
-                    outputs, gen_loss, dis_loss, logs = self.inpaint_model.process(images, outputs.detach(), masks)
-                    outputs_merged = (outputs * masks) + (images * (1 - masks))
+                     # train
+                     outputs, gen_loss, dis_loss, logs = self.inpaint_model.process(images)
+                     # outputs_merged = (outputs * masks) + (images * (1 - masks))
+                     outputs_merged = (outputs * (1 - masks)) + (images * masks)
 
-                    # metrics
-                    psnr = self.psnr(self.postprocess(images), self.postprocess(outputs_merged))
-                    mae = (torch.sum(torch.abs(images - outputs_merged)) / torch.sum(images)).float()
-                    logs.append(('psnr', psnr.item()))
-                    logs.append(('mae', mae.item()))
+                     # metrics
+                     psnr = self.psnr(self.postprocess(images), self.postprocess(outputs_merged))
+                     mae = (torch.sum(torch.abs(images - outputs_merged)) / torch.sum(images)).float()
+                     logs.append(('psnr', psnr.item()))
+                     logs.append(('mae', mae.item()))
 
-                    # backward
-                    self.inpaint_model.backward(gen_loss, dis_loss)
-                    iteration = self.inpaint_model.iteration
+                     # backward
+                     self.inpaint_model.backward(gen_loss, dis_loss)
+                     iteration = self.inpaint_model.iteration
+
+                #     # train
+                #     if True or np.random.binomial(1, 0.5) > 0:
+                #         outputs = self.edge_model(images_gray, edges, masks)
+                #         outputs = outputs * masks + edges * (1 - masks)
+                #     else:
+                #         outputs = edges
+                #
+                #     outputs, gen_loss, dis_loss, logs = self.inpaint_model.process(images, outputs.detach(), masks)
+                #     outputs_merged = (outputs * masks) + (images * (1 - masks))
+                #
+                #     # metrics
+                #     psnr = self.psnr(self.postprocess(images), self.postprocess(outputs_merged))
+                #     mae = (torch.sum(torch.abs(images - outputs_merged)) / torch.sum(images)).float()
+                #     logs.append(('psnr', psnr.item()))
+                #     logs.append(('mae', mae.item()))
+                #
+                #     # backward
+                #     self.inpaint_model.backward(gen_loss, dis_loss)
+                #     iteration = self.inpaint_model.iteration
 
 
                 # joint model
