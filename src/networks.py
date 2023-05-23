@@ -46,6 +46,33 @@ class BaseNetwork(nn.Module):
 
         self.apply(init_func)
 
+    def _set_trainable(self, train_part='all'):
+        if not self.trainable:
+            for pn, p in self.named_parameters():
+                p.requires_grad = False
+            self.eval()
+        else:
+            if train_part not in ['all', '']:
+
+                # first make it untrainable
+                for pn, p in self.named_parameters():
+                    p.requires_grad = False
+                self.eval()
+
+                # then make some modules be trainable
+                train_part = train_part.split(',')
+                for tp in train_part:
+                    if len(tp) > 0:
+                        tp_sub = tp.split('.')
+                        for i in range(len(tp_sub)):
+                            if i == 0:
+                                module = getattr(self, tp_sub[i])
+                            else:
+                                module = getattr(module, tp_sub[i])
+                        module.train()
+                        for pn, p in module.named_parameters():
+                            p.requires_grad = True
+
 
 class InpaintGenerator(BaseNetwork):
     def __init__(self, residual_blocks=8, use_spectral_norm=True,init_weights=True, ckpt_path=None,ignore_keys=[], trainable=True, train_part='all'):
