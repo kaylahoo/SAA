@@ -320,7 +320,7 @@ class InpaintingModel1(BaseModel):
 
 
         # process outputs
-        outputs,ema_loss = self(images, masks)
+        outputs = self(images, masks)
         gen_loss = 0
         dis_loss = 0
 
