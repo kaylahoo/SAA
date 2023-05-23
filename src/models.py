@@ -313,6 +313,7 @@ class InpaintingModel1(BaseModel):
 
     def process(self, images, masks):
         self.iteration += 1
+        print(masks.shape)
 
         # zero optimizers
         self.gen_optimizer.zero_grad()
