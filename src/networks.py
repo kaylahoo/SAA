@@ -118,6 +118,21 @@ class InpaintGenerator(BaseNetwork):
             if init_weights:
                 self.init_weights()
 
+    def init_from_ckpt(self, path, ignore_keys=list()):
+        sd = torch.load(path, map_location="cpu")
+        if 'model' in sd:
+            sd = sd['model']
+        else:
+            sd = sd["state_dict"]
+        keys = list(sd.keys())
+        for k in keys:
+            for ik in ignore_keys:
+                if k.startswith(ik):
+                    print("P-VQVAE: Deleting key {} from state_dict.".format(k))
+                    del sd[k]
+        self.load_state_dict(sd, strict=False)
+        print("P-VQVAE: Load pretrained model from {}".format(path))
+
     def forward(self, x):
         x = self.encoder(x)
         x = self.middle1(x)
