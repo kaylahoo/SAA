@@ -147,7 +147,7 @@ class EdgeConnect():
                 elif model == 3:
 
                      # train
-                     outputs, gen_loss, dis_loss, logs = self.inpaint_model1.process(images,masks)
+                     outputs, gen_loss, dis_loss, logs = self.inpaint_model1.process(images, masks)
                      # outputs_merged = (outputs * masks) + (images * (1 - masks))
                      outputs_merged = (outputs * (1 - masks)) + (images * masks)
 
