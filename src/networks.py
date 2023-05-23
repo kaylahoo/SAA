@@ -288,7 +288,7 @@ class InpaintGenerator1(BaseNetwork):
         path ="/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
         self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
         self.codebook = self.content_codec.quantize.get_codebook()['default']['code']
-        self.self_attn = nn.MultiheadAttention(n_embed, n_head, dropout)
+        #self.self_attn = nn.MultiheadAttention(n_embed, n_head, dropout)
 
     def forward(self, images_masks):
         x = images_masks
