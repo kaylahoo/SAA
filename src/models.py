@@ -2,7 +2,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from .networks import InpaintGenerator, EdgeGenerator, Discriminator
+from .networks import InpaintGenerator, InpaintGenerator1,EdgeGenerator, Discriminator
 from .loss import AdversarialLoss, PerceptualLoss, StyleLoss
 
 
@@ -280,7 +280,7 @@ class InpaintingModel1(BaseModel):
 
         # generator input: [rgb(3) + edge(1)]
         # discriminator input: [rgb(3)]
-        generator = InpaintGenerator()
+        generator = InpaintGenerator1()
         discriminator = Discriminator(in_channels=3, use_sigmoid=config.GAN_LOSS != 'hinge')
         if len(config.GPU) > 1:
             generator = nn.DataParallel(generator, config.GPU)

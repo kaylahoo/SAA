@@ -249,14 +249,13 @@ class InpaintGenerator1(BaseNetwork):
     def forward(self, x):
         x = self.encoder(x)
         x = self.middle1(x)
-
-        quant_out = self.quantize(x, token_type=None, step=None, total_steps=None)
-        quant = quant_out['quantize']
-        emb_loss = quant_out['quantize_loss']
-        x = self.middle2(quant)
+        # quant_out = self.quantize(x, token_type=None, step=None, total_steps=None)
+        # quant = quant_out['quantize']
+        # emb_loss = quant_out['quantize_loss']
+        x = self.middle2(x)
         x = self.decoder(x)
         x = torch.sigmoid(x)
-        return x, emb_loss
+        return x #, emb_loss
 
 
     #     self.encoder = nn.Sequential(
