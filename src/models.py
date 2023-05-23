@@ -319,8 +319,6 @@ class InpaintingModel1(BaseModel):
         self.gen_optimizer.zero_grad()
         self.dis_optimizer.zero_grad()
 
-        print(images.shape)
-        print(masks.shape, '11111111')
         # process outputs
         outputs = self(images, masks)
         gen_loss = 0
@@ -379,7 +377,7 @@ class InpaintingModel1(BaseModel):
         # return outputs
         images_masked = images * masks.float()
         inputs = torch.cat((images_masked, masks), dim=1)  # in: [rgb(3) + masks(1)]v
-        outputs = self.generator(inputs, masks)  # in: [grayscale(1) + edge(1) + mask(1)]
+        outputs = self.generator(inputs)  # in: [grayscale(1) + edge(1) + mask(1)]
         return outputs
 
     def backward(self, gen_loss=None, dis_loss=None):
