@@ -254,13 +254,6 @@ class InpaintGenerator1(BaseNetwork):
             blocks1.append(block)
 
         self.middle1 = nn.Sequential(*blocks1)
-        self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
-        # codebook中的权重是512维，复制8遍，以便匹配注意力层的num_heads参数
-        k = self.codebook.repeat(1, 8, 1)
-        v = self.codebook.repeat(1, 8, 1)
-        # 将 k 和 v 转换为固定的张量，以便在前向传播时使用
-        self.register_buffer('k', k.transpose(0, 1))
-        self.register_buffer('v', v.transpose(0, 1))
         blocks2 = []
         for _ in range(4):
             block = ResnetBlock(512, 2, use_spectral_norm=use_spectral_norm)
@@ -295,6 +288,13 @@ class InpaintGenerator1(BaseNetwork):
         path ="/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
         self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
         self.codebook = self.content_codec.quantize.get_codebook()['default']['code']
+        self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
+        # codebook中的权重是512维，复制8遍，以便匹配注意力层的num_heads参数
+        k = self.codebook.repeat(1, 8, 1)
+        v = self.codebook.repeat(1, 8, 1)
+        # 将 k 和 v 转换为固定的张量，以便在前向传播时使用
+        self.register_buffer('k', k.transpose(0, 1))
+        self.register_buffer('v', v.transpose(0, 1))
 
 
     def forward(self, images_masked):
