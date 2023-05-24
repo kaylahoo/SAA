@@ -3,6 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 from image_synthesis.utils.misc import instantiate_from_config
 from image_synthesis.modeling.codecs.base_codec import BaseCodec
@@ -288,20 +289,20 @@ class InpaintGenerator1(BaseNetwork):
         path ="/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
         self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
         self.codebook = self.content_codec.quantize.get_codebook()['default']['code']
+
+        codebook = np.repeat(self.codebook[:, None], repeats=8, axis=1)
+        self.codebook = torch.from_numpy(codebook.transpose(1, 2, 0))
         self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
-        # codebook中的权重是512维，复制8遍，以便匹配注意力层的num_heads参数
-        k = self.codebook.repeat(1, 8, 1)
-        v = self.codebook.repeat(1, 8, 1)
-        # 将 k 和 v 转换为固定的张量，以便在前向传播时使用
-        self.register_buffer('k', k.transpose(0, 1))
-        self.register_buffer('v', v.transpose(0, 1))
 
 
     def forward(self, images_masked):
         x = images_masked
         x = self.encoder(x)
         x = self.middle1(x)
-        attn_out, _ = self.attn(x, self.k, self.v)
+        k = self.codebook.repeat(x.size(0), 1, 1).to(x.device)
+        v = self.codebook.repeat(x.size(0), 1, 1).to(x.device)
+        attn_out, _ = self.attn(x, k, v)
+        x = x + attn_out
         x = x + attn_out
         x = self.middle2(x)
         x = self.decoder(x)
