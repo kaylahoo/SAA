@@ -299,7 +299,9 @@ class InpaintGenerator1(BaseNetwork):
         x = images_masked
         x = self.encoder(x)
         x = self.middle1(x)
-        mem = self.codebook.repeat(x.size(0), 1, 1)
+        b, c, h, w = x.shape
+        tgt = x.reshape(b, c, h * w).permute(2, 0, 1).contiguous()
+        mem = self.codebook.repeat(x.size(0), 1, 1).to(tgt.device)
         attn_out, _ = self.attn(x, mem, mem)
         x = x + attn_out
         x = self.middle2(x)
