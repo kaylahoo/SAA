@@ -290,9 +290,6 @@ class InpaintGenerator1(BaseNetwork):
         self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
         self.codebook = self.content_codec.quantize.get_codebook()['default']['code']
 
-        codebook = self.codebook.permute(1, 0, 2, 3).unsqueeze(0)
-        self.register_buffer('codebook', codebook)
-
         self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
 
 
@@ -302,9 +299,8 @@ class InpaintGenerator1(BaseNetwork):
         x = images_masked
         x = self.encoder(x)
         x = self.middle1(x)
-        k = self.codebook.repeat(x.size(0), 1, 1)
-        v = self.codebook.repeat(x.size(0), 1, 1)
-        attn_out, _ = self.attn(x, k, v)
+        mem = self.codebook.repeat(x.size(0), 1, 1)
+        attn_out, _ = self.attn(x, mem, mem)
         x = x + attn_out
         x = self.middle2(x)
         x = self.decoder(x)
