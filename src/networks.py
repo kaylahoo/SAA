@@ -289,7 +289,6 @@ class InpaintGenerator1(BaseNetwork):
         path ="/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
         self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
         self.kv = self.content_codec.quantize.get_codebook()['default']['code']
-
         self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
 
 
@@ -305,8 +304,8 @@ class InpaintGenerator1(BaseNetwork):
         # mem = self.kv.repeat(1, x.shape[0], 1).to(tgt.device)
         # attn_out, _ = self.attn(x, mem, mem)
         # x = x + attn_out
-        # x = self.middle2(x)
-        # x = self.decoder(x)
+        x = self.middle2(x)
+        x = self.decoder(x)
         #x = torch.sigmoid(x)
         return x #, emb_loss
 
