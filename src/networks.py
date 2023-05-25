@@ -301,7 +301,7 @@ class InpaintGenerator1(BaseNetwork):
         b, c, h, w = x.shape
         tgt = x.reshape(b, c, h * w).permute(2, 0, 1).contiguous()
         # # #print(tgt.shape) [1024,12,512]
-        mem = self.kv.repeat(1, x.shape[0], 1).to(tgt.device)
+        mem = self.kv.unsqueeze(dim=1).repeat(1, x.shape[0], 1).to(tgt.device)
         attn_out, _ = self.attn(x, mem, mem)
         x = x + attn_out
         x = self.middle2(x)
@@ -625,7 +625,7 @@ class VectorQuantizer(nn.Module):
     def get_codebook(self):
         codes = {
             'default': {
-                'code': self.embedding
+                'code': self.embed_weight
             }
         }
         default_label = torch.ones((self.n_e)).to(self.device)
