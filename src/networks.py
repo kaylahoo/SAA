@@ -307,7 +307,7 @@ class InpaintGenerator1(BaseNetwork):
         x = x + attn_out
         x = self.middle2(x)
         x = self.decoder(x)
-        x = torch.sigmoid(x)
+        #x = torch.sigmoid(x)
         return x #, emb_loss
 
 
