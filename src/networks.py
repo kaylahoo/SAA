@@ -286,7 +286,8 @@ class InpaintGenerator1(BaseNetwork):
         if init_weights:
             self.init_weights()
 
-        path ="/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
+        path ="/home/lab265/8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
+        #"/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
         self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
         self.kv = self.content_codec.quantize.get_codebook()['default']['code']
         self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
