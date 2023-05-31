@@ -301,7 +301,8 @@ class InpaintGenerator(BaseNetwork):
         tgt = x.reshape(b, c, h * w).permute(2, 0, 1).contiguous()
         # # #print(tgt.shape) [1024,12,512]
         mem = self.kv.unsqueeze(dim=1).repeat(1, x.shape[0], 1).to(tgt.device)
-        attn_out, _ = self.attn(tgt, mem, tgt)
+        print(men.shape)
+        attn_out, _ = self.attn(tgt, mem, mem)
         attn_out = attn_out.permute(1, 2, 0).reshape(x.shape)
         x = x + attn_out
         x = self.middle2(x)
