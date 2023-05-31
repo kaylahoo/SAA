@@ -311,142 +311,142 @@ class InpaintGenerator(BaseNetwork):
         return x #, emb_loss
 
 
-class InpaintGenerator(BaseNetwork):
-    def __init__(self, residual_blocks=8, use_spectral_norm=True,init_weights=True):
-        super(InpaintGenerator, self).__init__()
-
-        self.encoder = nn.Sequential(
-            nn.ReflectionPad2d(3),
-            spectral_norm(nn.Conv2d(in_channels=4, out_channels=64, kernel_size=7, padding=0), use_spectral_norm),
-            nn.InstanceNorm2d(64, track_running_stats=False),
-            nn.ReLU(True),
-
-            spectral_norm(nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2, padding=1),
-                          use_spectral_norm),
-            nn.InstanceNorm2d(128, track_running_stats=False),
-            nn.ReLU(True),
-
-            spectral_norm(nn.Conv2d(in_channels=128, out_channels=256, kernel_size=4, stride=2, padding=1),
-                          use_spectral_norm),
-            nn.InstanceNorm2d(256, track_running_stats=False),
-            nn.ReLU(True),
-
-            spectral_norm(nn.Conv2d(in_channels=256, out_channels=512, kernel_size=4, stride=2, padding=1),
-                          use_spectral_norm),
-            nn.InstanceNorm2d(512, track_running_stats=False),
-            nn.ReLU(True)
-
-        )
-
-        blocks1 = []
-        for _ in range(4):
-            block = ResnetBlock(512, 2, use_spectral_norm=use_spectral_norm)
-            blocks1.append(block)
-
-        self.middle1 = nn.Sequential(*blocks1)
-        blocks2 = []
-        for _ in range(4):
-            block = ResnetBlock(512, 2, use_spectral_norm=use_spectral_norm)
-            blocks2.append(block)
-
-        self.middle2 = nn.Sequential(*blocks2)
-        self.quantize = VectorQuantizer(n_e=1024, e_dim=512)
-        self.decoder = nn.Sequential(
-
-            spectral_norm(nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=4, stride=2, padding=1),
-                          use_spectral_norm),
-            nn.InstanceNorm2d(256, track_running_stats=False),
-            nn.ReLU(True),
-
-            spectral_norm(nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1),
-                          use_spectral_norm),
-            nn.InstanceNorm2d(128, track_running_stats=False),
-            nn.ReLU(True),
-
-            spectral_norm(nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1),
-                          use_spectral_norm),
-            nn.InstanceNorm2d(64, track_running_stats=False),
-            nn.ReLU(True),
-
-            nn.ReflectionPad2d(3),
-            nn.Conv2d(in_channels=64, out_channels=3, kernel_size=7, padding=0)
-        )
-
-        if init_weights:
-            self.init_weights()
-
-        path ="/home/lab265/8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
-        #"/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
-        self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
-        self.kv = self.content_codec.quantize.get_codebook()['default']['code']
-        self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
-
-
-
-
-    def forward(self, images_masked):
-        x = images_masked
-        x = self.encoder(x)
-        x = self.middle1(x)
-        b, c, h, w = x.shape
-        tgt = x.reshape(b, c, h * w).permute(2, 0, 1).contiguous()
-        # # #print(tgt.shape) [1024,12,512]
-        mem = self.kv.unsqueeze(dim=1).repeat(1, x.shape[0], 1).to(tgt.device)
-        attn_out, _ = self.attn(tgt, mem, tgt)
-        attn_out = attn_out.permute(1, 2, 0).reshape(x.shape)
-        x = x + attn_out
-        x = self.middle2(x)
-        x = self.decoder(x)
-        x = (torch.tanh(x) + 1) / 2
-        #x = torch.sigmoid(x) #edge
-        return x #, emb_loss
-
-
-    #     self.encoder = nn.Sequential(
-    #         nn.ReflectionPad2d(3),
-    #         nn.Conv2d(in_channels=4, out_channels=64, kernel_size=7, padding=0),
-    #         nn.InstanceNorm2d(64, track_running_stats=False),
-    #         nn.ReLU(True),
-    #
-    #         nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2, padding=1),
-    #         nn.InstanceNorm2d(128, track_running_stats=False),
-    #         nn.ReLU(True),
-    #
-    #         nn.Conv2d(in_channels=128, out_channels=256, kernel_size=4, stride=2, padding=1),
-    #         nn.InstanceNorm2d(256, track_running_stats=False),
-    #         nn.ReLU(True)
-    #     )
-    #
-    #     blocks = []
-    #     for _ in range(residual_blocks):
-    #         block = ResnetBlock(256, 2)
-    #         blocks.append(block)
-    #
-    #     self.middle = nn.Sequential(*blocks)
-    #
-    #     self.decoder = nn.Sequential(
-    #         nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1),
-    #         nn.InstanceNorm2d(128, track_running_stats=False),
-    #         nn.ReLU(True),
-    #
-    #         nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1),
-    #         nn.InstanceNorm2d(64, track_running_stats=False),
-    #         nn.ReLU(True),
-    #
-    #         nn.ReflectionPad2d(3),
-    #         nn.Conv2d(in_channels=64, out_channels=3, kernel_size=7, padding=0),
-    #     )
-    #
-    #     if init_weights:
-    #         self.init_weights()
-    #
-    # def forward(self, x):
-    #     x = self.encoder(x)
-    #     x = self.middle(x)
-    #     x = self.decoder(x)
-    #     x = (torch.tanh(x) + 1) / 2
-    #
-    #     return x
+# class InpaintGenerator(BaseNetwork):
+#     def __init__(self, residual_blocks=8, use_spectral_norm=True,init_weights=True):
+#         super(InpaintGenerator, self).__init__()
+#
+#         self.encoder = nn.Sequential(
+#             nn.ReflectionPad2d(3),
+#             spectral_norm(nn.Conv2d(in_channels=4, out_channels=64, kernel_size=7, padding=0), use_spectral_norm),
+#             nn.InstanceNorm2d(64, track_running_stats=False),
+#             nn.ReLU(True),
+#
+#             spectral_norm(nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2, padding=1),
+#                           use_spectral_norm),
+#             nn.InstanceNorm2d(128, track_running_stats=False),
+#             nn.ReLU(True),
+#
+#             spectral_norm(nn.Conv2d(in_channels=128, out_channels=256, kernel_size=4, stride=2, padding=1),
+#                           use_spectral_norm),
+#             nn.InstanceNorm2d(256, track_running_stats=False),
+#             nn.ReLU(True),
+#
+#             spectral_norm(nn.Conv2d(in_channels=256, out_channels=512, kernel_size=4, stride=2, padding=1),
+#                           use_spectral_norm),
+#             nn.InstanceNorm2d(512, track_running_stats=False),
+#             nn.ReLU(True)
+#
+#         )
+#
+#         blocks1 = []
+#         for _ in range(4):
+#             block = ResnetBlock(512, 2, use_spectral_norm=use_spectral_norm)
+#             blocks1.append(block)
+#
+#         self.middle1 = nn.Sequential(*blocks1)
+#         blocks2 = []
+#         for _ in range(4):
+#             block = ResnetBlock(512, 2, use_spectral_norm=use_spectral_norm)
+#             blocks2.append(block)
+#
+#         self.middle2 = nn.Sequential(*blocks2)
+#         self.quantize = VectorQuantizer(n_e=1024, e_dim=512)
+#         self.decoder = nn.Sequential(
+#
+#             spectral_norm(nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=4, stride=2, padding=1),
+#                           use_spectral_norm),
+#             nn.InstanceNorm2d(256, track_running_stats=False),
+#             nn.ReLU(True),
+#
+#             spectral_norm(nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1),
+#                           use_spectral_norm),
+#             nn.InstanceNorm2d(128, track_running_stats=False),
+#             nn.ReLU(True),
+#
+#             spectral_norm(nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1),
+#                           use_spectral_norm),
+#             nn.InstanceNorm2d(64, track_running_stats=False),
+#             nn.ReLU(True),
+#
+#             nn.ReflectionPad2d(3),
+#             nn.Conv2d(in_channels=64, out_channels=3, kernel_size=7, padding=0)
+#         )
+#
+#         if init_weights:
+#             self.init_weights()
+#
+#         path ="/home/lab265/8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
+#         #"/home/lab265/lab265/lab508_8T/liulu/SAA/checkpoints/ffhq/InpaintingModel_gen.pth"
+#         self.content_codec = InpaintGenerator(ckpt_path=path, trainable=False)
+#         self.kv = self.content_codec.quantize.get_codebook()['default']['code']
+#         self.attn = nn.MultiheadAttention(embed_dim=512, num_heads=8)
+#
+#
+#
+#
+#     def forward(self, images_masked):
+#         x = images_masked
+#         x = self.encoder(x)
+#         x = self.middle1(x)
+#         b, c, h, w = x.shape
+#         tgt = x.reshape(b, c, h * w).permute(2, 0, 1).contiguous()
+#         # # #print(tgt.shape) [1024,12,512]
+#         mem = self.kv.unsqueeze(dim=1).repeat(1, x.shape[0], 1).to(tgt.device)
+#         attn_out, _ = self.attn(tgt, mem, tgt)
+#         attn_out = attn_out.permute(1, 2, 0).reshape(x.shape)
+#         x = x + attn_out
+#         x = self.middle2(x)
+#         x = self.decoder(x)
+#         x = (torch.tanh(x) + 1) / 2
+#         #x = torch.sigmoid(x) #edge
+#         return x #, emb_loss
+#
+#
+#     #     self.encoder = nn.Sequential(
+#     #         nn.ReflectionPad2d(3),
+#     #         nn.Conv2d(in_channels=4, out_channels=64, kernel_size=7, padding=0),
+#     #         nn.InstanceNorm2d(64, track_running_stats=False),
+#     #         nn.ReLU(True),
+#     #
+#     #         nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2, padding=1),
+#     #         nn.InstanceNorm2d(128, track_running_stats=False),
+#     #         nn.ReLU(True),
+#     #
+#     #         nn.Conv2d(in_channels=128, out_channels=256, kernel_size=4, stride=2, padding=1),
+#     #         nn.InstanceNorm2d(256, track_running_stats=False),
+#     #         nn.ReLU(True)
+#     #     )
+#     #
+#     #     blocks = []
+#     #     for _ in range(residual_blocks):
+#     #         block = ResnetBlock(256, 2)
+#     #         blocks.append(block)
+#     #
+#     #     self.middle = nn.Sequential(*blocks)
+#     #
+#     #     self.decoder = nn.Sequential(
+#     #         nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1),
+#     #         nn.InstanceNorm2d(128, track_running_stats=False),
+#     #         nn.ReLU(True),
+#     #
+#     #         nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1),
+#     #         nn.InstanceNorm2d(64, track_running_stats=False),
+#     #         nn.ReLU(True),
+#     #
+#     #         nn.ReflectionPad2d(3),
+#     #         nn.Conv2d(in_channels=64, out_channels=3, kernel_size=7, padding=0),
+#     #     )
+#     #
+#     #     if init_weights:
+#     #         self.init_weights()
+#     #
+#     # def forward(self, x):
+#     #     x = self.encoder(x)
+#     #     x = self.middle(x)
+#     #     x = self.decoder(x)
+#     #     x = (torch.tanh(x) + 1) / 2
+#     #
+#     #     return x
 
 
 class EdgeGenerator(BaseNetwork):
