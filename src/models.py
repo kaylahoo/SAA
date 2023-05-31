@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from .networks import  InpaintGenerator1,EdgeGenerator, Discriminator#,InpaintGenerator
 from .loss import AdversarialLoss, PerceptualLoss, StyleLoss
-from .stageone import InpaintGenerator
+from .stageone import InpaintGenerator1
 
 
 
