@@ -52,10 +52,10 @@ names = []
 index = 1
 
 files = list(glob(path_true + '/*.jpg')) + list(glob(path_true + '/*.png'))
-i = 0
+# i = 0
 for fn in sorted(files):
-    if i >= 2000:
-        break
+    # if i >= 2000:
+    #     break
     name = basename(str(fn))
     names.append(name)
 
@@ -88,7 +88,7 @@ for fn in sorted(files):
             "MAE: %.4f" % round(np.mean(mae), 4),
         )
     index += 1
-    i += 1
+    # i += 1
 
 np.savez(args.output_path + '/metrics.npz', psnr=psnr, ssim=ssim, mae=mae, names=names)
 print(

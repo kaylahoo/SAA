@@ -7,7 +7,7 @@ import argparse
 from shutil import copyfile
 from src.config import Config
 from src.edge_connect import EdgeConnect
-
+from torch import nn
 
 def main(mode=None):
     r"""starts the model
@@ -27,6 +27,7 @@ def main(mode=None):
     if torch.cuda.is_available():
         print("True!!!!!!!!!!!!!!")
         config.DEVICE = torch.device("cuda")
+        print(config.DEVICE)
         torch.backends.cudnn.benchmark = True   # cudnn auto-tuner
     else:
         print("False!!!!!!!!!!!!!!")
@@ -55,6 +56,7 @@ def main(mode=None):
     if config.MODE == 1:
         config.print()
         print('\nstart training...\n')
+
         model.train()
 
     # model test
